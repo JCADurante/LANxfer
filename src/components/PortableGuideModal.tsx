@@ -22,7 +22,7 @@ interface PortableGuideModalProps {
 }
 
 export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'portable' | 'workflow'>('portable');
+  const [activeTab, setActiveTab] = useState<'portable' | 'workflow' | 'ports'>('portable');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -54,8 +54,8 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
               <Cpu className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-100 text-base">Portable Node.js & GitHub Compiler</h3>
-              <p className="text-xs text-slate-400">Zero-install LAN server bundled via automated CI/CD.</p>
+              <h3 className="font-semibold text-slate-100 text-base">Portable Node.js &amp; Launcher Guide</h3>
+              <p className="text-xs text-slate-400">Zero-install LAN server, custom ports, and CI compilation.</p>
             </div>
           </div>
 
@@ -68,28 +68,39 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-800 bg-slate-950/40 px-5 pt-2 gap-2">
+        <div className="flex border-b border-slate-800 bg-slate-950/40 px-5 pt-2 gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('portable')}
-            className={`flex items-center gap-2 pb-2.5 px-3 text-xs font-medium border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-2 pb-2.5 px-3 text-xs font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'portable'
                 ? 'border-cyan-400 text-cyan-300'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             <Layers className="w-4 h-4" />
-            1. Run with Portable Node.js
+            1. Run Portable Node
+          </button>
+          <button
+            onClick={() => setActiveTab('ports')}
+            className={`flex items-center gap-2 pb-2.5 px-3 text-xs font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
+              activeTab === 'ports'
+                ? 'border-cyan-400 text-cyan-300'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Terminal className="w-4 h-4" />
+            2. Localhost &amp; Custom Ports
           </button>
           <button
             onClick={() => setActiveTab('workflow')}
-            className={`flex items-center gap-2 pb-2.5 px-3 text-xs font-medium border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-2 pb-2.5 px-3 text-xs font-medium border-b-2 transition-all cursor-pointer shrink-0 ${
               activeTab === 'workflow'
                 ? 'border-cyan-400 text-cyan-300'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
             <GitBranch className="w-4 h-4" />
-            2. GitHub Actions Compiler
+            3. GitHub Actions CI
           </button>
         </div>
 
@@ -163,7 +174,7 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
               <div className="space-y-2">
                 <h4 className="font-semibold text-slate-100 flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">3</span>
-                  Zero Dependencies & USB Drive Ready
+                  Zero Dependencies &amp; USB Drive Ready
                 </h4>
                 <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 space-y-1.5 text-xs text-slate-400">
                   <p className="flex items-center gap-2 text-slate-200">
@@ -174,6 +185,83 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
                     <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                     <strong>Runs from any USB drive:</strong> Everything is contained in the folder without writing to Windows Registry.
                   </p>
+                </div>
+              </div>
+            </>
+          ) : activeTab === 'ports' ? (
+            <>
+              {/* Localhost & Custom Ports Tab */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-slate-100 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">!</span>
+                  Running on Different Localhost Ports (Not Just 3000)
+                </h4>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  By default, the server runs on port <strong>3000</strong>. If port 3000 is occupied by another app or you prefer another port (like 8080, 5000, 8000), you can specify any port directly:
+                </p>
+
+                <div className="space-y-3">
+                  {/* Option A: Windows Argument */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-slate-200 text-xs">Windows (Pass port as argument)</div>
+                      <button
+                        onClick={() => copyCode('start.bat 8080', 'p-win')}
+                        className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedSection === 'p-win' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>Copy</span>
+                      </button>
+                    </div>
+                    <code className="block bg-slate-900 px-2.5 py-1.5 rounded text-cyan-300 font-mono text-xs">
+                      start.bat 8080
+                    </code>
+                    <p className="text-[11px] text-slate-400">
+                      Starts the server on <code className="text-slate-300 font-mono">http://localhost:8080</code> and automatically opens the browser at that address.
+                    </p>
+                  </div>
+
+                  {/* Option B: Linux / macOS Argument */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-slate-200 text-xs">Linux / macOS (Positional arg or env var)</div>
+                      <button
+                        onClick={() => copyCode('./start.sh 8080', 'p-sh')}
+                        className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedSection === 'p-sh' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>Copy</span>
+                      </button>
+                    </div>
+                    <code className="block bg-slate-900 px-2.5 py-1.5 rounded text-cyan-300 font-mono text-xs">
+                      ./start.sh 8080 &nbsp;&nbsp;&nbsp;# Or: PORT=8080 ./start.sh
+                    </code>
+                  </div>
+
+                  {/* Option C: Direct Node CLI */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-slate-200 text-xs">Standalone Node CLI (Direct execution)</div>
+                      <button
+                        onClick={() => copyCode('node dist/server.cjs --port 5000', 'p-node')}
+                        className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedSection === 'p-node' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>Copy</span>
+                      </button>
+                    </div>
+                    <code className="block bg-slate-900 px-2.5 py-1.5 rounded text-cyan-300 font-mono text-xs">
+                      node dist/server.cjs --port 5000
+                    </code>
+                  </div>
+
+                  {/* Option D: Environment Variable */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
+                    <div className="font-semibold text-slate-200 text-xs">Environment Variable Support</div>
+                    <p className="text-[11px] text-slate-400">
+                      The server also listens to the <code className="text-cyan-300 font-mono">PORT</code> or <code className="text-cyan-300 font-mono">APP_PORT</code> environment variables automatically.
+                    </p>
+                  </div>
                 </div>
               </div>
             </>
@@ -211,7 +299,7 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
                 <ol className="list-decimal list-inside space-y-1.5 text-xs text-slate-400">
                   <li>Navigate to your GitHub repository in your browser.</li>
                   <li>Click on the <strong>Actions</strong> tab at the top.</li>
-                  <li>Click on the latest completed workflow run: <strong className="text-slate-200">"Build & Package Ready-To-Use Portable App"</strong>.</li>
+                  <li>Click on the latest completed workflow run: <strong className="text-slate-200">"Build &amp; Package Ready-To-Use Portable App"</strong>.</li>
                   <li>Scroll down to the <strong>Artifacts</strong> section and download <strong className="text-cyan-300">portable-lan-transfer-ready-to-use.zip</strong>.</li>
                   <li>Unzip it anywhere and drop your portable <code className="text-slate-200">node.exe</code> to run!</li>
                 </ol>

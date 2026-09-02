@@ -70,7 +70,26 @@ if not exist "%~dp0dist\server.cjs" (
     exit /b 1
 )
 
+:: 5. Port Configuration (Defaults to 3000, or custom port via argument/environment)
+set "APP_PORT=3000"
+if defined PORT set "APP_PORT=!PORT!"
+
+if not "%~1"=="" (
+    if "%~1"=="--port" (
+        if not "%~2"=="" set "APP_PORT=%~2"
+    ) else if "%~1"=="-p" (
+        if not "%~2"=="" set "APP_PORT=%~2"
+    ) else (
+        set "APP_PORT=%~1"
+    )
+)
+
+set "PORT=!APP_PORT!"
+set "NODE_ENV=production"
+
 echo [*] Using Node runtime: !NODE_EXE!
+echo [*] Localhost Port Selected: !PORT!
+echo [*] (Tip: To use another port like 8080, run: start.bat 8080 or set PORT=8080)
 echo [*] Initializing LAN File Transfer Server...
 echo.
 
@@ -79,18 +98,14 @@ if not exist "%~dp0uploads" (
     mkdir "%~dp0uploads" >nul 2>nul
 )
 
-:: Set environment variables
-set "NODE_ENV=production"
-if not defined PORT set "PORT=3000"
-
 :: Auto-open default browser after 1.5 seconds in background
 start "" /b cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:!PORT!"
 
 :: Launch the standalone server
-echo [*] Server is starting on port !PORT!...
+echo [*] Server running at http://localhost:!PORT!
 echo [*] Press Ctrl+C in this console window to stop the server.
 echo.
-"!NODE_EXE!" "%~dp0dist\server.cjs"
+"!NODE_EXE!" "%~dp0dist\server.cjs" --port !PORT!
 
 if !errorlevel! neq 0 (
     echo.

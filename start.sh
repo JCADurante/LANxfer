@@ -50,13 +50,26 @@ if [ ! -f "$DIR/dist/server.cjs" ]; then
   exit 1
 fi
 
+# Determine custom port from args or environment variable
+APP_PORT="${PORT:-3000}"
+if [ "$1" = "--port" ] || [ "$1" = "-p" ]; then
+  if [ -n "$2" ]; then
+    APP_PORT="$2"
+  fi
+elif [ -n "$1" ] && [ "$1" != "run" ]; then
+  APP_PORT="$1"
+fi
+
+export NODE_ENV=production
+export PORT="$APP_PORT"
+
 echo "[*] Using Node runtime: $NODE_BIN"
+echo "[*] Localhost Port Selected: $PORT"
+echo "[*] (Tip: To use another port like 8080, run: ./start.sh 8080 or PORT=8080 ./start.sh)"
 echo "[*] Initializing LAN File Transfer Server..."
 echo ""
 
 mkdir -p "$DIR/uploads"
-export NODE_ENV=production
-export PORT="${PORT:-3000}"
 
 # Auto-open browser in background if available
 (sleep 2 && {
@@ -71,4 +84,4 @@ echo "[*] Server running at http://localhost:${PORT}"
 echo "[*] Press Ctrl+C to stop."
 echo ""
 
-exec "$NODE_BIN" "$DIR/dist/server.cjs"
+exec "$NODE_BIN" "$DIR/dist/server.cjs" --port "$PORT"

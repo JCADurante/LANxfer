@@ -26,7 +26,19 @@ PART 1: STARTING THE SERVER (HOST PC)
     Then double-click `start.bat`.
 
 ▶ THE BROWSER OPENS AUTOMATICALLY:
-  - The host dashboard will open at: http://localhost:3000
+  - The host dashboard will open at: http://localhost:3000 (or your chosen port)
+
+▶ RUNNING ON CUSTOM LOCALHOST PORTS (NOT JUST 3000):
+  If port 3000 is occupied or you want to use another port (like 8080, 5000, 8000):
+  - Windows:
+      start.bat 8080
+      (or start.bat 5000, start.bat 8000, etc.)
+  - Linux / macOS:
+      ./start.sh 8080
+      (or PORT=8080 ./start.sh)
+  - Direct Node command:
+      node dist/server.cjs --port 8080
+  The launcher will automatically open http://localhost:<port> in your browser.
 
 ================================================================================
 PART 2: HOW OTHER PCS / PHONES GET AND SEND FILES

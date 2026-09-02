@@ -23,7 +23,42 @@ interface StoredNote {
   senderIp: string;
 }
 
-const PORT = 3000;
+// Determine listening port from CLI arguments, environment variable, or default 3000
+function getPort(): number {
+  const args = process.argv.slice(2);
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if ((arg === '--port' || arg === '-p') && args[i + 1]) {
+      const parsed = parseInt(args[i + 1], 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+    }
+    if (arg.startsWith('--port=') || arg.startsWith('-p=')) {
+      const parsed = parseInt(arg.split('=')[1], 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+    }
+    if (arg.startsWith('port=')) {
+      const parsed = parseInt(arg.split('=')[1], 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+    }
+    const directNum = parseInt(arg, 10);
+    if (!isNaN(directNum) && directNum > 0 && directNum <= 65535 && !arg.startsWith('-')) {
+      return directNum;
+    }
+  }
+
+  if (process.env.PORT) {
+    const parsed = parseInt(process.env.PORT, 10);
+    if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+  }
+  if (process.env.APP_PORT) {
+    const parsed = parseInt(process.env.APP_PORT, 10);
+    if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+  }
+
+  return 3000;
+}
+
+const PORT = getPort();
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 const METADATA_FILE = path.join(UPLOADS_DIR, '_metadata.json');
 const NOTES_FILE = path.join(UPLOADS_DIR, '_notes.json');

@@ -27,6 +27,7 @@ fs.cpSync(distDir, path.join(outputDir, 'dist'), { recursive: true });
 const filesToCopy = [
   'start.bat',
   'start.sh',
+  'HOW_TO_USE.txt',
   'README_PORTABLE.txt',
   'PORTABLE_INSTRUCTIONS.md',
   '.env.example',

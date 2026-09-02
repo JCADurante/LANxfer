@@ -4,7 +4,6 @@ import fs from 'fs';
 import os from 'os';
 import multer from 'multer';
 import crypto from 'crypto';
-import { createServer as createViteServer } from 'vite';
 
 interface StoredFile {
   id: string;
@@ -415,6 +414,7 @@ async function startServer() {
 
   // Setup Vite middleware for development or static serving for production
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

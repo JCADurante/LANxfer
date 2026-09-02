@@ -114,6 +114,18 @@ export default function App() {
           // ignore
         }
       });
+
+      eventSource.addEventListener('port-switched', (e) => {
+        try {
+          const payload = JSON.parse(e.data);
+          fetchInfo();
+          if (payload.port) {
+            showToast(`⚡ Port switched to :${payload.port} (Auto-running)`);
+          }
+        } catch {
+          // ignore
+        }
+      });
     } catch (err) {
       console.error('SSE initialization error:', err);
     }
@@ -246,7 +258,11 @@ export default function App() {
       {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-6 md:py-8 space-y-6">
         {/* Network Host Connection Banner */}
-        <NetworkHostCard serverInfo={serverInfo} onOpenGuide={() => setShowGuide(true)} />
+        <NetworkHostCard 
+          serverInfo={serverInfo} 
+          onOpenGuide={() => setShowGuide(true)} 
+          onPortSwitched={() => fetchInfo()} 
+        />
 
         {/* Upload & Drag-and-Drop Area */}
         <DropZone onUploadSuccess={() => { fetchFiles(); fetchInfo(); }} />

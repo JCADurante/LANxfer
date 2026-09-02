@@ -50,8 +50,18 @@ if [ ! -f "$DIR/dist/server.cjs" ]; then
   exit 1
 fi
 
-# Determine custom port from args or environment variable
-APP_PORT="${PORT:-3000}"
+# Determine custom port from saved config, args or environment variable
+APP_PORT=""
+if [ -f "$DIR/port.conf" ]; then
+  APP_PORT=$(cat "$DIR/port.conf" | tr -d '[:space:]')
+fi
+if [ -z "$APP_PORT" ] && [ -f "$DIR/uploads/_port.conf" ]; then
+  APP_PORT=$(cat "$DIR/uploads/_port.conf" | tr -d '[:space:]')
+fi
+if [ -z "$APP_PORT" ]; then
+  APP_PORT="${PORT:-3000}"
+fi
+
 if [ "$1" = "--port" ] || [ "$1" = "-p" ]; then
   if [ -n "$2" ]; then
     APP_PORT="$2"

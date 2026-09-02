@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import http from 'http';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
@@ -23,7 +24,11 @@ interface StoredNote {
   senderIp: string;
 }
 
-// Determine listening port from CLI arguments, environment variable, or default 3000
+// Determine listening port from CLI arguments, environment variable, port.conf, or default 3000
+const PORT_CONF_FILE = path.join(process.cwd(), 'port.conf');
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+const UPLOADS_PORT_CONF = path.join(UPLOADS_DIR, '_port.conf');
+
 function getPort(): number {
   const args = process.argv.slice(2);
   for (let i = 0; i < args.length; i++) {
@@ -55,11 +60,28 @@ function getPort(): number {
     if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
   }
 
+  // Check saved port.conf files
+  try {
+    if (fs.existsSync(PORT_CONF_FILE)) {
+      const content = fs.readFileSync(PORT_CONF_FILE, 'utf-8').trim();
+      const parsed = parseInt(content, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+    }
+    if (fs.existsSync(UPLOADS_PORT_CONF)) {
+      const content = fs.readFileSync(UPLOADS_PORT_CONF, 'utf-8').trim();
+      const parsed = parseInt(content, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed <= 65535) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+
   return 3000;
 }
 
-const PORT = getPort();
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
+const INITIAL_PORT = getPort();
+let currentPort = INITIAL_PORT;
+const activeServers = new Map<number, http.Server>();
 const METADATA_FILE = path.join(UPLOADS_DIR, '_metadata.json');
 const NOTES_FILE = path.join(UPLOADS_DIR, '_notes.json');
 
@@ -199,17 +221,18 @@ async function startServer() {
     const addresses = getNetworkInterfaces();
     const files = loadFilesMetadata();
     const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
-    const hostHeader = req.headers.host || `localhost:${PORT}`;
+    const hostHeader = req.headers.host || `localhost:${currentPort}`;
     const protocol = req.protocol;
 
     const externalIpv4 = addresses.find(a => !a.isInternal);
     const preferredUrl = externalIpv4
-      ? `http://${externalIpv4.address}:${PORT}`
+      ? `http://${externalIpv4.address}:${currentPort}`
       : `${protocol}://${hostHeader}`;
 
     res.json({
       hostname: os.hostname(),
-      port: PORT,
+      port: currentPort,
+      activePorts: Array.from(activeServers.keys()),
       localIps: addresses,
       preferredUrl,
       totalFiles: files.length,
@@ -217,6 +240,75 @@ async function startServer() {
       activePeers: sseClients.size,
       storageDir: UPLOADS_DIR,
       isLocalServer: !process.env.APP_URL || process.env.APP_URL.includes('localhost'),
+    });
+  });
+
+  // API: Auto-run and Switch Port Dynamically
+  app.post('/api/server/switch-port', async (req, res) => {
+    const rawPort = req.body.port;
+    const requestedPort = parseInt(rawPort, 10);
+    if (isNaN(requestedPort) || requestedPort <= 0 || requestedPort > 65535) {
+      return res.status(400).json({ error: 'Invalid port number (must be 1-65535)' });
+    }
+
+    // Persist to port.conf & uploads/_port.conf
+    try {
+      fs.writeFileSync(PORT_CONF_FILE, requestedPort.toString(), 'utf-8');
+      fs.writeFileSync(UPLOADS_PORT_CONF, requestedPort.toString(), 'utf-8');
+    } catch (e) {
+      console.error('Failed to write port.conf:', e);
+    }
+
+    let bindSuccess = false;
+    let bindMessage = '';
+
+    // If port is already bound, mark success
+    if (activeServers.has(requestedPort)) {
+      bindSuccess = true;
+      bindMessage = `Port ${requestedPort} is actively listening`;
+    } else {
+      // Attempt dynamic bind in local Node runtime
+      try {
+        await new Promise<void>((resolve) => {
+          const srv = app.listen(requestedPort, '0.0.0.0', () => {
+            activeServers.set(requestedPort, srv);
+            bindSuccess = true;
+            bindMessage = `Server successfully auto-started on port ${requestedPort}`;
+            console.log(`[+] Auto-run: Now also listening on http://localhost:${requestedPort}`);
+            resolve();
+          });
+          srv.once('error', (err: any) => {
+            if (err.code === 'EADDRINUSE') {
+              bindMessage = `Port ${requestedPort} is already in use by another process`;
+            } else {
+              bindMessage = `Port ${requestedPort} bind notice: ${err.message}`;
+            }
+            resolve();
+          });
+        });
+      } catch (err: any) {
+        bindMessage = `Bind error: ${err?.message || err}`;
+      }
+    }
+
+    currentPort = requestedPort;
+
+    // Broadcast SSE port-switched notification
+    broadcastSSE('port-switched', {
+      port: requestedPort,
+      activePorts: Array.from(activeServers.keys()),
+      bindSuccess,
+      message: bindMessage,
+      targetUrl: `http://localhost:${requestedPort}`,
+    });
+
+    return res.json({
+      success: true,
+      port: requestedPort,
+      activePorts: Array.from(activeServers.keys()),
+      bindSuccess,
+      message: bindMessage,
+      targetUrl: `http://localhost:${requestedPort}`,
     });
   });
 
@@ -463,14 +555,15 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const initialServer = app.listen(INITIAL_PORT, '0.0.0.0', () => {
+    activeServers.set(INITIAL_PORT, initialServer);
     console.log(`\n========================================`);
     console.log(`🚀 Portable LAN File Transfer Server Active!`);
-    console.log(`📡 Local Port: ${PORT}`);
+    console.log(`📡 Local Port: ${INITIAL_PORT}`);
     const addresses = getNetworkInterfaces();
     console.log(`🌐 Available LAN Addresses:`);
     for (const a of addresses) {
-      console.log(`   👉 http://${a.address}:${PORT} (${a.name})`);
+      console.log(`   👉 http://${a.address}:${INITIAL_PORT} (${a.name})`);
     }
     console.log(`📂 Storage Folder: ${UPLOADS_DIR}`);
     console.log(`========================================\n`);

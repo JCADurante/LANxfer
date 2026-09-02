@@ -19,6 +19,7 @@ export interface NetworkInterfaceInfo {
 export interface ServerInfo {
   hostname: string;
   port: number;
+  activePorts?: number[];
   localIps: NetworkInterfaceInfo[];
   preferredUrl: string;
   totalFiles: number;

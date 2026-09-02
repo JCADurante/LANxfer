@@ -70,8 +70,19 @@ if not exist "%~dp0dist\server.cjs" (
     exit /b 1
 )
 
-:: 5. Port Configuration (Defaults to 3000, or custom port via argument/environment)
-set "APP_PORT=3000"
+:: 5. Port Configuration (Auto-loads saved port.conf or 3000, overrideable via argument/environment)
+set "APP_PORT="
+if exist "%~dp0port.conf" (
+    set /p SAVED_PORT=<"%~dp0port.conf"
+    if not "!SAVED_PORT!"=="" set "APP_PORT=!SAVED_PORT!"
+)
+if "!APP_PORT!"=="" (
+    if exist "%~dp0uploads\_port.conf" (
+        set /p SAVED_PORT2=<"%~dp0uploads\_port.conf"
+        if not "!SAVED_PORT2!"=="" set "APP_PORT=!SAVED_PORT2!"
+    )
+)
+if "!APP_PORT!"=="" set "APP_PORT=3000"
 if defined PORT set "APP_PORT=!PORT!"
 
 if not "%~1"=="" (
@@ -88,8 +99,8 @@ set "PORT=!APP_PORT!"
 set "NODE_ENV=production"
 
 echo [*] Using Node runtime: !NODE_EXE!
-echo [*] Localhost Port Selected: !PORT!
-echo [*] (Tip: To use another port like 8080, run: start.bat 8080 or set PORT=8080)
+echo [*] Auto-Run Localhost Port: !PORT!
+echo [*] (Switch channels anytime in web dashboard or run: start.bat 1111, start.bat 2222, start.bat 5000, start.bat 8080)
 echo [*] Initializing LAN File Transfer Server...
 echo.
 

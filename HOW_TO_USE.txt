@@ -29,13 +29,21 @@ PART 1: STARTING THE SERVER (HOST PC)
   - The host dashboard will open at: http://localhost:3000 (or your chosen port)
 
 ▶ MULTI-CHANNEL PORT SWITCHING (1111, 2222, 3000, 5000, 8080):
-  If port 3000 is occupied or you want to run multiple independent instances:
-  - Preset Channel 1:  start.bat 1111   (http://localhost:1111)
-  - Preset Channel 2:  start.bat 2222   (http://localhost:2222)
-  - Default Core:      start.bat 3000   (http://localhost:3000)
-  - Dev Bridge:        start.bat 5000   (http://localhost:5000)
-  - Alternate Proxy:   start.bat 8080   (http://localhost:8080)
-  - Any Custom Port:   start.bat <port> (e.g., start.bat 7777)
+  You can switch ports in 2 ways:
+
+  Method A: Instant Auto-Run from Web UI:
+    - Click the "Auto-Run Port" switch bar in the web header.
+    - Click any channel preset (1111, 2222, 3000, 5000, 8080) or custom port.
+    - The server immediately switches and auto-runs on the selected port!
+    - The selected port is automatically saved to `port.conf`.
+
+  Method B: Command-Line Launcher:
+    - Preset Channel 1:  start.bat 1111   (http://localhost:1111)
+    - Preset Channel 2:  start.bat 2222   (http://localhost:2222)
+    - Default Core:      start.bat 3000   (http://localhost:3000)
+    - Dev Bridge:        start.bat 5000   (http://localhost:5000)
+    - Alternate Proxy:   start.bat 8080   (http://localhost:8080)
+    - Any Custom Port:   start.bat <port> (e.g., start.bat 7777)
 
   Linux / macOS:
       ./start.sh 1111    (or ./start.sh 2222, ./start.sh 5000, ./start.sh 8080)

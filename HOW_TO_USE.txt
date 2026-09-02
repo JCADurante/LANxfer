@@ -28,16 +28,21 @@ PART 1: STARTING THE SERVER (HOST PC)
 ▶ THE BROWSER OPENS AUTOMATICALLY:
   - The host dashboard will open at: http://localhost:3000 (or your chosen port)
 
-▶ RUNNING ON CUSTOM LOCALHOST PORTS (NOT JUST 3000):
-  If port 3000 is occupied or you want to use another port (like 8080, 5000, 8000):
-  - Windows:
-      start.bat 8080
-      (or start.bat 5000, start.bat 8000, etc.)
-  - Linux / macOS:
-      ./start.sh 8080
-      (or PORT=8080 ./start.sh)
-  - Direct Node command:
-      node dist/server.cjs --port 8080
+▶ MULTI-CHANNEL PORT SWITCHING (1111, 2222, 3000, 5000, 8080):
+  If port 3000 is occupied or you want to run multiple independent instances:
+  - Preset Channel 1:  start.bat 1111   (http://localhost:1111)
+  - Preset Channel 2:  start.bat 2222   (http://localhost:2222)
+  - Default Core:      start.bat 3000   (http://localhost:3000)
+  - Dev Bridge:        start.bat 5000   (http://localhost:5000)
+  - Alternate Proxy:   start.bat 8080   (http://localhost:8080)
+  - Any Custom Port:   start.bat <port> (e.g., start.bat 7777)
+
+  Linux / macOS:
+      ./start.sh 1111    (or ./start.sh 2222, ./start.sh 5000, ./start.sh 8080)
+      PORT=1111 ./start.sh
+
+  Direct Node command:
+      node dist/server.cjs --port 1111
   The launcher will automatically open http://localhost:<port> in your browser.
 
 ================================================================================

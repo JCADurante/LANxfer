@@ -194,19 +194,41 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
               <div className="space-y-3">
                 <h4 className="font-semibold text-slate-100 flex items-center gap-2">
                   <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs">!</span>
-                  Running on Different Localhost Ports (Not Just 3000)
+                  Multi-Channel Port Switcher (1111, 2222, 3000, 5000, 8080)
                 </h4>
                 <p className="text-slate-400 text-xs leading-relaxed">
-                  By default, the server runs on port <strong>3000</strong>. If port 3000 is occupied by another app or you prefer another port (like 8080, 5000, 8000), you can specify any port directly:
+                  Avoid port conflicts or run multiple instances simultaneously across independent channels. The built-in launcher and server support instant switching:
                 </p>
 
-                <div className="space-y-3">
+                {/* Preset Chips */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {[
+                    { port: '1111', label: 'Fast Stream' },
+                    { port: '2222', label: 'Mirror Ch.' },
+                    { port: '3000', label: 'Default' },
+                    { port: '5000', label: 'Dev Bridge' },
+                    { port: '8080', label: 'Alt Proxy' },
+                  ].map((item) => (
+                    <button
+                      key={item.port}
+                      onClick={() => copyCode(`start.bat ${item.port}`, `chip-${item.port}`)}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-cyan-500/50 text-xs font-mono text-cyan-300 flex items-center gap-1.5 cursor-pointer transition-colors"
+                      title={`Click to copy: start.bat ${item.port}`}
+                    >
+                      <span className="font-bold">{item.port}</span>
+                      <span className="text-[10px] text-slate-400">({item.label})</span>
+                      {copiedSection === `chip-${item.port}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-500" />}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="space-y-3 pt-1">
                   {/* Option A: Windows Argument */}
                   <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <div className="font-semibold text-slate-200 text-xs">Windows (Pass port as argument)</div>
+                      <div className="font-semibold text-slate-200 text-xs">Windows Launcher (Pass port as argument)</div>
                       <button
-                        onClick={() => copyCode('start.bat 8080', 'p-win')}
+                        onClick={() => copyCode('start.bat 1111', 'p-win')}
                         className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
                       >
                         {copiedSection === 'p-win' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -214,19 +236,19 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
                       </button>
                     </div>
                     <code className="block bg-slate-900 px-2.5 py-1.5 rounded text-cyan-300 font-mono text-xs">
-                      start.bat 8080
+                      start.bat 1111 &nbsp;&nbsp;&nbsp;# or: start.bat 2222, start.bat 5000, start.bat 8080
                     </code>
                     <p className="text-[11px] text-slate-400">
-                      Starts the server on <code className="text-slate-300 font-mono">http://localhost:8080</code> and automatically opens the browser at that address.
+                      Starts the server on <code className="text-slate-300 font-mono">http://localhost:1111</code> and opens your default browser.
                     </p>
                   </div>
 
                   {/* Option B: Linux / macOS Argument */}
                   <div className="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <div className="font-semibold text-slate-200 text-xs">Linux / macOS (Positional arg or env var)</div>
+                      <div className="font-semibold text-slate-200 text-xs">Linux / macOS Launcher</div>
                       <button
-                        onClick={() => copyCode('./start.sh 8080', 'p-sh')}
+                        onClick={() => copyCode('./start.sh 2222', 'p-sh')}
                         className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
                       >
                         {copiedSection === 'p-sh' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -234,7 +256,7 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
                       </button>
                     </div>
                     <code className="block bg-slate-900 px-2.5 py-1.5 rounded text-cyan-300 font-mono text-xs">
-                      ./start.sh 8080 &nbsp;&nbsp;&nbsp;# Or: PORT=8080 ./start.sh
+                      ./start.sh 2222 &nbsp;&nbsp;&nbsp;# Or: PORT=2222 ./start.sh
                     </code>
                   </div>
 
@@ -243,7 +265,7 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
                     <div className="flex items-center justify-between">
                       <div className="font-semibold text-slate-200 text-xs">Standalone Node CLI (Direct execution)</div>
                       <button
-                        onClick={() => copyCode('node dist/server.cjs --port 5000', 'p-node')}
+                        onClick={() => copyCode('node dist/server.cjs --port 1111', 'p-node')}
                         className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
                       >
                         {copiedSection === 'p-node' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -251,7 +273,7 @@ export const PortableGuideModal: React.FC<PortableGuideModalProps> = ({ isOpen, 
                       </button>
                     </div>
                     <code className="block bg-slate-900 px-2.5 py-1.5 rounded text-cyan-300 font-mono text-xs">
-                      node dist/server.cjs --port 5000
+                      node dist/server.cjs --port 1111
                     </code>
                   </div>
 

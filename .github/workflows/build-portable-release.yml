@@ -29,11 +29,15 @@ jobs:
       - name: 🟢 Setup Node.js Compiler Environment
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: '22'
 
       - name: 📦 Install Build Dependencies
-        run: npm ci || npm install
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci || npm install
+          else
+            npm install
+          fi
 
       - name: ⚡ Compile Applet (Vite Frontend & Standalone Server)
         run: npm run build
@@ -50,10 +54,11 @@ jobs:
           cp start.bat release-package/
           cp start.sh release-package/
           chmod +x release-package/start.sh
-          cp README_PORTABLE.txt release-package/
-          cp PORTABLE_INSTRUCTIONS.md release-package/
-          cp .env.example release-package/
-          cp package.json release-package/
+          [ -f HOW_TO_USE.txt ] && cp HOW_TO_USE.txt release-package/
+          [ -f README_PORTABLE.txt ] && cp README_PORTABLE.txt release-package/
+          [ -f PORTABLE_INSTRUCTIONS.md ] && cp PORTABLE_INSTRUCTIONS.md release-package/
+          [ -f .env.example ] && cp .env.example release-package/
+          [ -f package.json ] && cp package.json release-package/
           
           # Create zip archive
           cd release-package

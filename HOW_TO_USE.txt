@@ -1,0 +1,67 @@
+================================================================================
+       LAN FILE TRANSFER GUIDE - MULTI-RUNTIME SUPPORT (HOW TO USE)
+================================================================================
+
+This application supports BOTH:
+  1. System-Installed Node.js (Auto-detected from your PC / PATH / NVM / Scoop / FNM)
+  2. Portable Node.js (Zero installation needed — runs anywhere, even from USB!)
+
+================================================================================
+PART 1: STARTING THE SERVER (HOST PC)
+================================================================================
+
+▶ IF YOU HAVE NODE.JS INSTALLED ON YOUR PC:
+  - Just double-click `start.bat` (Windows) or run `./start.sh` (Linux/macOS).
+  - The launcher automatically detects your installed Node.js and starts instantly.
+  - No extra configuration needed!
+
+▶ IF YOU DON'T HAVE NODE.JS INSTALLED (PORTABLE MODE):
+  Option A - 1-Click Auto-Download:
+    Double-click `start.bat`. If Node is not found, press 'Y' when prompted to
+    automatically download portable `node.exe` right into this folder.
+
+  Option B - Manual Portable Node.js:
+    Place `node.exe` directly in this folder next to `start.bat` (or inside a
+    `bin\`, `nodejs\`, `portable-node\`, or `runtime\` subfolder).
+    Then double-click `start.bat`.
+
+▶ THE BROWSER OPENS AUTOMATICALLY:
+  - The host dashboard will open at: http://localhost:3000
+
+================================================================================
+PART 2: HOW OTHER PCS / PHONES GET AND SEND FILES
+================================================================================
+
+1. CONNECT TO THE SAME WI-FI OR ETHERNET:
+   - Make sure both the Host PC and the other PCs/phones are on the same
+     Wi-Fi router or local network.
+
+2. CHECK THE HOST IP ADDRESS:
+   - On the Host PC screen, look at the top network banner.
+   - It will display your LAN address, for example:
+     http://192.168.1.105:3000
+
+3. OPEN ON ANY OTHER PC / LAPTOP / PHONE:
+   - Open any browser (Chrome, Edge, Safari, Firefox) on the other device.
+   - Type in the host IP in the address bar (e.g., http://192.168.1.105:3000).
+
+4. INSTANT TRANSFER:
+   - DOWNLOAD: Click Download on any shared file.
+   - UPLOAD: Drop files onto the page to upload them to the Host PC.
+   - CLIPBOARD / NOTES: Use the Quick Notes box to share links and text in real time.
+   - MOBILE: Click 'Show QR Code' on the Host PC and scan it with a phone/tablet camera.
+
+================================================================================
+PART 3: TROUBLESHOOTING & TIPS
+================================================================================
+
+Q: Which Node.js version is supported?
+A: Any Node.js v18, v20, v22, or higher (both installed and portable).
+
+Q: The other PC cannot connect to the Host IP?
+A: When Windows Firewall shows a prompt upon launching, make sure to check
+   "Allow access on Private Networks".
+
+Q: Where are files stored on the host computer?
+A: Uploaded files are saved locally inside the `uploads\` folder in this directory.
+================================================================================

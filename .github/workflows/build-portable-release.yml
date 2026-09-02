@@ -1,0 +1,80 @@
+name: Build & Package Ready-To-Use Portable App
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Publish as a GitHub Release (requires tag or release token)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-package:
+    name: Compile & Package Portable App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js Compiler Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📦 Install Build Dependencies
+        run: npm ci || npm install
+
+      - name: ⚡ Compile Applet (Vite Frontend & Standalone Server)
+        run: npm run build
+
+      - name: 🗜️ Assemble Portable Release Package
+        run: |
+          mkdir -p release-package/dist
+          mkdir -p release-package/uploads
+          
+          # Copy compiled output
+          cp -r dist/* release-package/dist/
+          
+          # Copy portable launchers and docs
+          cp start.bat release-package/
+          cp start.sh release-package/
+          chmod +x release-package/start.sh
+          cp README_PORTABLE.txt release-package/
+          cp PORTABLE_INSTRUCTIONS.md release-package/
+          cp .env.example release-package/
+          cp package.json release-package/
+          
+          # Create zip archive
+          cd release-package
+          zip -r ../portable-lan-transfer-ready-to-run.zip .
+          cd ..
+
+      - name: 📤 Upload Ready-To-Use Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-lan-transfer-ready-to-use
+          path: portable-lan-transfer-ready-to-run.zip
+          retention-days: 90
+
+      - name: 🚀 Publish to GitHub Releases (On Tag or Release)
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || github.event.inputs.create_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: portable-lan-transfer-ready-to-run.zip
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
